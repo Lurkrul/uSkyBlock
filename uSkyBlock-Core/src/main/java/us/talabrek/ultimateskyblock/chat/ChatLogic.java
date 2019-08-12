@@ -1,6 +1,7 @@
 package us.talabrek.ultimateskyblock.chat;
 
 import dk.lockfuglsang.minecraft.po.I18nUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import us.talabrek.ultimateskyblock.api.IslandInfo;
 import us.talabrek.ultimateskyblock.api.event.IslandChatEvent;
@@ -9,6 +10,7 @@ import us.talabrek.ultimateskyblock.handler.placeholder.PlaceholderHandler;
 import us.talabrek.ultimateskyblock.uSkyBlock;
 import dk.lockfuglsang.minecraft.util.FormatUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,9 +32,11 @@ public class ChatLogic {
     private final uSkyBlock plugin;
     private final Map<IslandChatEvent.Type, String> formats = new HashMap<>();
     private final Map<UUID, IslandChatEvent.Type> toggled = new HashMap<>();
+    private String spyFormat;
 
     public ChatLogic(uSkyBlock plugin) {
         this.plugin = plugin;
+        spyFormat = plugin.getConfig().getString("options.admin.spyFormat", "&9SKY &r{SENDER} -> {RECEIVERS} &f>&b {MESSAGE}");
         formats.put(IslandChatEvent.Type.PARTY, plugin.getConfig().getString("options.party.chat-format", "&9PARTY &r{DISPLAYNAME} &f>&d {MESSAGE}"));
         formats.put(IslandChatEvent.Type.ISLAND, plugin.getConfig().getString("options.island.chat-format", "&9SKY &r{DISPLAYNAME} &f>&b {MESSAGE}"));
     }
@@ -56,19 +60,45 @@ public class ChatLogic {
         format = FormatUtil.normalize(format);
         format = format.replaceAll("\\{DISPLAYNAME\\}", Matcher.quoteReplacement(player.getDisplayName()));
         String msg = format.replaceAll("\\{MESSAGE\\}", Matcher.quoteReplacement(message));
+        //&9SKY &r{SENDER} -> {RECEIVERS} &f>&b {MESSAGE}
         msg = PlaceholderHandler.replacePlaceholders(player, msg);
         List<Player> onlineMembers = getRecipients(player, type);
+
+        String isSpyFormat = getSpyFormat(type);
+        isSpyFormat = isSpyFormat.replace("\\{SENDER\\}", Matcher.quoteReplacement(player.getDisplayName()));
+        isSpyFormat = isSpyFormat.replace("\\{MESSAGE\\}", Matcher.quoteReplacement(message));
+        StringBuilder builder = new StringBuilder();
+        for(Player p : onlineMembers) {
+            if(!builder.toString().equals("")) builder.append(", ");
+            builder.append(p.getDisplayName());
+        }
+        String spyMessage = PlaceholderHandler.replacePlaceholders(player, msg);
+        List<Player> spyMembers = new ArrayList<>();
+        //only add players that have chatspy perms
+        for(Player p : Bukkit.getOnlinePlayers()) {
+            if(p.hasPermission("usb.admin.istalkspy") && !onlineMembers.contains(p)) {
+                spyMembers.add(p);
+            }
+        }
+
         if (onlineMembers.size() <= 1) {
             player.sendMessage(I18nUtil.tr("\u00a7cSorry! {0}", "\u00a79" + ALONE.get(((int) Math.round(Math.random() * ALONE.size())) % ALONE.size())));
         } else {
             for (Player member : onlineMembers) {
                 member.sendMessage(msg);
             }
+            for(Player staff : spyMembers) {
+                staff.sendMessage(spyMessage);
+            }
         }
     }
 
     public String getFormat(IslandChatEvent.Type type) {
         return formats.get(type);
+    }
+
+    public String getSpyFormat(IslandChatEvent.Type type) {
+        return spyFormat;
     }
 
     /**

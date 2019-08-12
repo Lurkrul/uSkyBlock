@@ -254,6 +254,11 @@ options:
     # - me Jumps with &ajoy
     extra-commands: []
 
+  admin:
+
+    # Format for island chat spy
+    spyFormat: "&9SKY &r{SENDER} -> {RECEIVERS} &f>&b {MESSAGE}"
+
 # In this section it's possible to assign additional perks to permission-nodes
 donor-perks:
   # the permission node to give to someone

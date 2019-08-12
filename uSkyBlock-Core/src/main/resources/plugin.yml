@@ -167,6 +167,7 @@ permissions:
       usb.admin.topten: true
       usb.admin.version: true
       usb.admin.wg: true
+      usb.admin.istalkspy: true
 
   usb.biome.*:
     default: false
@@ -650,3 +651,7 @@ permissions:
   usb.giantbonus:
     default: false
     description: 'adds perks: extraItems:[Grass, Mycelium]'
+
+  usb.admin.istalkspy:
+    default: false
+    description: 'sends the user is chat messages'
