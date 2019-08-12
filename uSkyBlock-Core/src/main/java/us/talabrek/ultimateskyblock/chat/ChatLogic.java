@@ -46,7 +46,7 @@ public class ChatLogic {
             IslandInfo islandInfo = plugin.getIslandInfo(player);
             return islandInfo != null ? islandInfo.getOnlineMembers() : Collections.singletonList(player);
         } else if (chatType == IslandChatEvent.Type.ISLAND) {
-            if (plugin.getWorldManager().isSkyWorld(player.getWorld())) {
+            if (plugin.getWorldManager().isSkyAssociatedWorld(player.getWorld())) {
                 return WorldGuardHandler.getPlayersInRegion(plugin.getWorldManager().getWorld(),
                         WorldGuardHandler.getIslandRegionAt(player.getLocation()));
             }
@@ -63,16 +63,20 @@ public class ChatLogic {
         //&9SKY &r{SENDER} -> {RECEIVERS} &f>&b {MESSAGE}
         msg = PlaceholderHandler.replacePlaceholders(player, msg);
         List<Player> onlineMembers = getRecipients(player, type);
+        //todo filter out the invisible players
 
         String isSpyFormat = getSpyFormat(type);
-        isSpyFormat = isSpyFormat.replace("\\{SENDER\\}", Matcher.quoteReplacement(player.getDisplayName()));
-        isSpyFormat = isSpyFormat.replace("\\{MESSAGE\\}", Matcher.quoteReplacement(message));
+        isSpyFormat = FormatUtil.normalize(isSpyFormat);
+        isSpyFormat = isSpyFormat.replace("{SENDER}", player.getDisplayName());
+        isSpyFormat = isSpyFormat.replace("{MESSAGE}", message);
         StringBuilder builder = new StringBuilder();
         for(Player p : onlineMembers) {
+            if(player.equals(p)) continue;
             if(!builder.toString().equals("")) builder.append(", ");
             builder.append(p.getDisplayName());
         }
-        String spyMessage = PlaceholderHandler.replacePlaceholders(player, msg);
+        isSpyFormat = isSpyFormat.replace("{RECEIVERS}", builder.toString());
+        String spyMessage = PlaceholderHandler.replacePlaceholders(player, isSpyFormat);
         List<Player> spyMembers = new ArrayList<>();
         //only add players that have chatspy perms
         for(Player p : Bukkit.getOnlinePlayers()) {
