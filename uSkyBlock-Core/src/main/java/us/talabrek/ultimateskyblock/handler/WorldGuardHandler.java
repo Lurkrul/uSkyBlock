@@ -17,6 +17,8 @@ import dk.lockfuglsang.minecraft.po.I18nUtil;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -35,6 +37,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static dk.lockfuglsang.minecraft.po.I18nUtil.tr;
 
@@ -126,8 +129,8 @@ public class WorldGuardHandler {
         BlockVector3 minPoint = getProtectionVectorRight(islandLocation);
         BlockVector3 maxPoint = getProtectionVectorLeft(islandLocation);
         if (regionName != null && regionName.endsWith("nether")) {
-            minPoint = minPoint.withY(6);
-            maxPoint = maxPoint.withY(120);
+            minPoint = minPoint.withY(1);
+            maxPoint = maxPoint.withY(127);
         }
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(regionName, minPoint, maxPoint);
         final DefaultDomain owners = new DefaultDomain();
@@ -379,5 +382,16 @@ public class WorldGuardHandler {
 
     public static boolean isInRegion(ProtectedCuboidRegion islandRegion, Location loc) {
         return islandRegion.contains(asVector(loc));
+    }
+
+    public static int getHopperCartsInRegion(World world, ProtectedRegion region) {
+        List<Entity> entities = world.getEntities().stream().filter(entity -> entity.getType().equals(EntityType.MINECART_HOPPER)).collect(Collectors.toList());
+        int count = 0;
+        for(Entity e : entities) {
+            if(region.contains(asVector(e.getLocation()))) {
+                count++;
+            }
+        }
+        return count;
     }
 }

@@ -1,6 +1,7 @@
 package us.talabrek.ultimateskyblock.island.level;
 
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import us.talabrek.ultimateskyblock.api.model.BlockScore;
 
 import java.util.List;
@@ -34,9 +35,12 @@ public class BlockCountCollection {
     }
 
     public List<BlockScore> calculateScore(double pointsPerLevel) {
-        return countMap.entrySet().stream()
+        List<BlockScore> collect = countMap.entrySet().stream()
+                //todo pull in the entities and add to count
                 .map(e -> configMap.get(e.getKey()).calculateScore(e.getValue().intValue(), pointsPerLevel))
-                .filter(f -> f.getScore() != 0)
+                //.filter(f -> f.getScore() != 0)
+                //todo filter scores that are 0 AND DO NOT HAVE LIMITS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 .sorted(new BlockScoreComparator()).collect(Collectors.toList());
+        return collect;
     }
 }

@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 import us.talabrek.ultimateskyblock.Settings;
 import us.talabrek.ultimateskyblock.api.IslandRank;
 import us.talabrek.ultimateskyblock.api.async.Callback;
+import us.talabrek.ultimateskyblock.api.event.IslandInfoEvent;
+import us.talabrek.ultimateskyblock.api.model.IslandScore;
 import us.talabrek.ultimateskyblock.island.IslandInfo;
 import us.talabrek.ultimateskyblock.player.PlayerInfo;
 import us.talabrek.ultimateskyblock.uSkyBlock;
@@ -76,12 +78,18 @@ public class LevelCommand extends RequireIslandCommand {
             }
         };
         if (shouldRecalculate) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> plugin.calculateScoreAsync(player, info.locationForParty(), new Callback<us.talabrek.ultimateskyblock.api.model.IslandScore>() {
+            plugin.fireAsyncEvent(new IslandInfoEvent(player, info.getIslandLocation(), new Callback<IslandScore>() {
                 @Override
                 public void run() {
                     plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, showInfo, 10L);
                 }
-            }), 1L);
+            }));
+            /*plugin.getServer().getScheduler().runTaskLater(plugin, () -> plugin.calculateScoreAsync(player, info.locationForParty(), new Callback<us.talabrek.ultimateskyblock.api.model.IslandScore>() {
+                @Override
+                public void run() {
+                    plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, showInfo, 10L);
+                }
+            }), 1L);*/
         } else {
             showInfo.run();
         }

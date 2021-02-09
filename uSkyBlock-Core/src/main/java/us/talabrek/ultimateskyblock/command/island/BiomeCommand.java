@@ -59,6 +59,10 @@ public class BiomeCommand extends RequireIslandCommand {
 
     @Override
     protected boolean doExecute(String alias, final Player player, PlayerInfo pi, final IslandInfo island, Map<String, Object> data, final String... args) {
+        if(plugin.locationIsOnNetherIsland(player, player.getLocation())) {
+            player.sendMessage(tr("\u00a74You cannot do that in the nether!"));
+            return true;
+        }
         if (args.length == 0) {
             if (!island.hasPerm(player, "canChangeBiome")) {
                 player.sendMessage(tr("\u00a7cYou do not have permission to change the biome of your current island."));

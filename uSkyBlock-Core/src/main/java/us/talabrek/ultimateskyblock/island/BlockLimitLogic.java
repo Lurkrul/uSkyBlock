@@ -67,9 +67,7 @@ public class BlockLimitLogic {
         for (BlockScore blockScore : score.getTop()) {
             Material type = blockScore.getBlock().getType();
             if (blockLimits.containsKey(type)) {
-                int initalValue = countMap.getOrDefault(type, 0);
-                initalValue += blockScore.getCount();
-                countMap.put(type, initalValue);
+                countMap.put(type, (countMap.containsKey(type) ? countMap.get(type) + blockScore.getCount() : blockScore.getCount()));
             }
         }
         return countMap;

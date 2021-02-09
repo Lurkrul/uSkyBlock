@@ -5,6 +5,8 @@ import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitRunnable;
 import us.talabrek.ultimateskyblock.api.async.Callback;
 import us.talabrek.ultimateskyblock.handler.WorldGuardHandler;
@@ -87,6 +89,13 @@ public class ChunkSnapshotLevelLogic extends CommonLevelLogic {
                 }
             }
         }
+
+        //check for hopper minecarts
+        int count = WorldGuardHandler.getHopperCartsInRegion(plugin.getWorldManager().getWorld(), region) + WorldGuardHandler.getHopperCartsInRegion(plugin.getWorldManager().getNetherWorld(), netherRegion);
+        for(int i = 0; i < count; i++) {
+            counts.add(Material.HOPPER, (byte)0);
+        }
+
         IslandScore islandScore = createIslandScore(counts);
         if (islandScore.getScore() >= activateNetherAtLevel && netherRegion != null && snapshotsNether != null) {
             // Add nether levels
@@ -104,7 +113,7 @@ public class ChunkSnapshotLevelLogic extends CommonLevelLogic {
                     }
                     int cx = (x & 0xf);
                     int cz = (z & 0xf);
-                    for (int y = 6; y < 120; y++) {
+                    for (int y = 1; y < 127; y++) {
                         Material blockType = chunk.getBlockType(cx, y, cz);
                         if (blockType == Material.AIR) {
                             continue;
@@ -116,6 +125,7 @@ public class ChunkSnapshotLevelLogic extends CommonLevelLogic {
             }
             islandScore = createIslandScore(counts);
         }
+
         return islandScore;
     }
 

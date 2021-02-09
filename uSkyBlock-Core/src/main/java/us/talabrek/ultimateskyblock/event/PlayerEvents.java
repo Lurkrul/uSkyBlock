@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -12,17 +13,24 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.projectiles.ProjectileSource;
+import org.bukkit.util.Vector;
 import us.talabrek.ultimateskyblock.Settings;
 import us.talabrek.ultimateskyblock.api.async.Callback;
 import us.talabrek.ultimateskyblock.api.event.IslandInfoEvent;
@@ -348,5 +356,88 @@ public class PlayerEvents implements Listener {
             return;
         }
         plugin.getBlockLimitLogic().decBlockCount(islandInfo.getIslandLocation(), event.getBlock().getType());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperCartPlaced(EntityPlaceEvent event) {
+        if (!blockLimitsEnabled || !plugin.getWorldManager().isSkyAssociatedWorld(event.getPlayer().getWorld())) {
+            return; // Skip
+        }
+        if(!event.getEntityType().equals(EntityType.MINECART_HOPPER)) return;
+
+        IslandInfo info = plugin.getIslandInfo(event.getPlayer().getLocation());
+        BlockLimitLogic.CanPlace canPlace = plugin.getBlockLimitLogic().canPlace(Material.HOPPER, info);
+        if (canPlace == BlockLimitLogic.CanPlace.UNCERTAIN) {
+            event.setCancelled(true);
+            final String key = "usb.block-limits";
+            if (!PatienceTester.isRunning(event.getPlayer(), key)) {
+                PatienceTester.startRunning(event.getPlayer(), key);
+                event.getPlayer().sendMessage(tr("\u00a74{0} is limited. \u00a7eScanning your island to see if you are allowed to place more, please be patient", VaultHandler.getItemName(new ItemStack(Material.HOPPER_MINECART))));
+                plugin.fireAsyncEvent(new IslandInfoEvent(event.getPlayer(), info.getIslandLocation(), new Callback<IslandScore>() {
+                    @Override
+                    public void run() {
+                        event.getPlayer().sendMessage(tr("\u00a7e... Scanning complete, you can try again"));
+                        PatienceTester.stopRunning(event.getPlayer(), key);
+                    }
+                }));
+            }
+            return;
+        }
+        if (canPlace == BlockLimitLogic.CanPlace.NO) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(tr("\u00a74You''ve hit the {0} limit!\u00a7e You can''t have more of that type on your island!\u00a79 Max: {1,number}", VaultHandler.getItemName(new ItemStack(Material.HOPPER_MINECART)), plugin.getBlockLimitLogic().getLimit(Material.HOPPER)));
+            return;
+        }
+
+        plugin.getLogger().info("placed hopper cart");
+        plugin.getBlockLimitLogic().incBlockCount(info.getIslandLocation(), Material.HOPPER);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void dispense(BlockDispenseEvent event) {
+        if (!blockLimitsEnabled || !plugin.getWorldManager().isSkyAssociatedWorld(event.getBlock().getWorld())) {
+            return; // Skip
+        }
+        IslandInfo info = plugin.getIslandInfo(event.getBlock().getLocation());
+        if(!event.getItem().getType().equals(Material.HOPPER_MINECART)) return;
+        BlockLimitLogic.CanPlace canPlace = plugin.getBlockLimitLogic().canPlace(Material.HOPPER, info);
+        if (canPlace == BlockLimitLogic.CanPlace.UNCERTAIN) {
+            event.setCancelled(true);
+            final String key = "usb.block-limits";
+            plugin.fireAsyncEvent(new IslandInfoEvent(null, info.getIslandLocation(), new Callback<IslandScore>() {
+                @Override
+                public void run() {
+                }
+            }));
+        }
+        if(canPlace == BlockLimitLogic.CanPlace.NO) {
+            event.setCancelled(true);
+            return;
+        }
+        plugin.getBlockLimitLogic().incBlockCount(info.getIslandLocation(), Material.HOPPER);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperCartDestroyed(VehicleDestroyEvent event) {
+        if (!blockLimitsEnabled || !plugin.getWorldManager().isSkyAssociatedWorld(event.getVehicle().getWorld())) {
+            return; // Skip
+        }
+        if(!event.getVehicle().getType().equals(EntityType.MINECART_HOPPER)) return;
+        IslandInfo info = plugin.getIslandInfo(event.getVehicle().getLocation());
+        plugin.getLogger().info("broke minecart");
+        plugin.getBlockLimitLogic().decBlockCount(info.getIslandLocation(), Material.HOPPER);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperCartMoved(VehicleMoveEvent event) {
+        if (!blockLimitsEnabled || !plugin.getWorldManager().isSkyAssociatedWorld(event.getVehicle().getWorld())) {
+            return; // Skip
+        }
+        if(!event.getVehicle().getType().equals(EntityType.MINECART_HOPPER)) return;
+
+        //todo this needs work
+        IslandInfo from = plugin.getIslandInfo(event.getFrom());
+        IslandInfo to = plugin.getIslandInfo(event.getTo());
+        if(from != to) event.getVehicle().setVelocity(event.getVehicle().getVelocity().multiply(-1));
     }
 }
