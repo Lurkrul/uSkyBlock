@@ -226,7 +226,16 @@ public class WorldGuardHandler {
 
     public static String getIslandNameAt(Location location) {
         RegionManager regionManager = getRegionManager(location.getWorld());
-        Iterable<ProtectedRegion> applicableRegions = regionManager.getApplicableRegions(toVector(location));
+
+        //Adjust Y level to region height, because MiniaturePets spawns stuff at Y=350
+        Location adjustedLocation = new Location(
+                location.getWorld(),
+                location.getBlockX(),
+                Math.min(location.getBlockY(), 255),
+                location.getBlockZ()
+        );
+
+        Iterable<ProtectedRegion> applicableRegions = regionManager.getApplicableRegions(toVector(adjustedLocation));
         for (ProtectedRegion region : applicableRegions) {
             String id = region.getId().toLowerCase();
             if (!id.equalsIgnoreCase("__global__") && (id.endsWith("island") || id.endsWith("nether"))) {
