@@ -36,14 +36,13 @@ public class BiomeCommand extends RequireIslandCommand {
             put("plains", Biome.PLAINS);
             put("extreme_hills", Biome.DARK_FOREST_HILLS);
             put("deep_ocean", Biome.DEEP_OCEAN);
-            Biome b = getBiome("ICE_PLAINS");
-            if (b != null) {
-                put("ice_plains", b);
-            }
-            b = getBiome("FLOWER_FOREST");
-            if (b != null) {
-                put("flower_forest", b);
-            }
+            put("flower_forest", Biome.FLOWER_FOREST);
+            put("river", Biome.RIVER);
+            put("frozen_ocean", Biome.FROZEN_OCEAN);
+            put("beach", Biome.BEACH);
+            put("stone_shore", Biome.STONE_SHORE);
+            put("savanna", Biome.SAVANNA);
+            put("the_void", Biome.THE_VOID);
         }
     };
     private final SkyBlockMenu menu;

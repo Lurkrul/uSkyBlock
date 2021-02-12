@@ -129,7 +129,7 @@ public class SkyBlockMenu {
                     "extreme_hills", tr("Extreme Hills"),
                     tr("The extreme hills biome.\nPassive mobs will spawn \nnormally and hostile\nmobs will spawn.")
             ),
-            new BiomeMenuItem(new ItemStack(Material.ROSE_BUSH, 1, (short) 5),
+            new BiomeMenuItem(new ItemStack(Material.ROSE_BUSH, 1),
                     "flower_forest", tr("Flower Forest"),
                     tr("The flower forest biome.\nPassive mobs will spawn \nnormally and hostile\nmobs will spawn.")
             ),
@@ -141,9 +141,25 @@ public class SkyBlockMenu {
                             "(including Guardians) will\n" +
                             "spawn normally.")
             ),
-            new BiomeMenuItem(new ItemStack(Material.PACKED_ICE, 1),
-                    "ice_plains", tr("Ice Plains"),
-                    tr("The ice-plains biome is an advanced biome.\nMobs will spawn naturally.\nincluding polar-bears")
+            new BiomeMenuItem(new ItemStack(Material.WATER_BUCKET, 1),
+                    "river", tr("River"),
+                    tr("The river biome.\nPassive mobs will spawn \nnormally and hostile\nmobs will spawn.\nDrowned can spawn at night.")
+            ),
+            new BiomeMenuItem(new ItemStack(Material.ICE, 1),
+                    "frozen_ocean", tr("Frozen Ocean"),
+                    tr("The frozen ocean biome.\nPassive mobs will spawn \nnormally and hostile\nmobs will spawn.")
+            ),
+            new BiomeMenuItem(new ItemStack(Material.STONE, 1),
+                    "stone_shore", tr("Stone Shore"),
+                    tr("The stone shore biome.\nNo passive mobs will spawn.\nHostiles spawn normally.")
+            ),
+            new BiomeMenuItem(new ItemStack(Material.ACACIA_SAPLING, 1),
+                    "savanna", tr("Savanna"),
+                    tr("The savanna biome.\nPassive mobs will spawn \nnormally and hostile\nmobs will spawn.")
+            ),
+            new BiomeMenuItem(new ItemStack(Material.BEDROCK, 1),
+                    "the_void", tr("The Void"),
+                    tr("The void biome.\nNo mobs will spawn.")
             )
     );
 
@@ -285,7 +301,7 @@ public class SkyBlockMenu {
     public Inventory displayBiomeGUI(final Player player) {
         List<String> lores = new ArrayList<>();
         String title = "\u00a79" + tr("Island Biome");
-        Inventory menu = Bukkit.createInventory(new UltimateHolder(player, title), 27, title);
+        Inventory menu = Bukkit.createInventory(new UltimateHolder(player, title), 36, title);
         ItemMeta meta4 = sign.getItemMeta();
         meta4.setDisplayName("\u00a7h" + tr("Island Biome"));
         addLore(lores, tr("\u00a7eClick here to return to\n\u00a7ethe main island screen."));
@@ -346,7 +362,7 @@ public class SkyBlockMenu {
         lores.add(tr(tr("Current radius: {0}", radiusDisplay)));
         itemMeta.setLore(lores);
         menuItem.setItemMeta(itemMeta);
-        menu.setItem(21, menuItem);
+        menu.setItem(30, menuItem);
 
         lores.clear();
         menuItem = new ItemStack(Material.GRASS_BLOCK);
@@ -364,7 +380,7 @@ public class SkyBlockMenu {
         itemMeta.setDisplayName(tr("Current radius: {0}", radiusDisplay));
         itemMeta.setLore(lores);
         menuItem.setItemMeta(itemMeta);
-        menu.setItem(22, menuItem);
+        menu.setItem(31, menuItem);
 
         lores.clear();
         menuItem = new ItemStack(Material.GREEN_CARPET);
@@ -374,7 +390,7 @@ public class SkyBlockMenu {
         lores.add(tr(tr("Current radius: {0}", radiusDisplay)));
         itemMeta.setLore(lores);
         menuItem.setItemMeta(itemMeta);
-        menu.setItem(23, menuItem);
+        menu.setItem(32, menuItem);
     }
 
     private void addExtraMenus(Player player, Inventory menu) {
