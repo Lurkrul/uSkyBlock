@@ -78,8 +78,18 @@ options:
       golems: 5
     block-limits:
       enabled: true
-      hopper: 50
-      spawner: 10
+      entries:
+        - level: 0
+          hopper: 1
+          spawner: 1
+        -
+          level: 1
+          hopper: 20
+          spawner: 20
+        -
+          level: 2
+          hopper: 25
+          spawner: 25
     extraPermissions:
       smallbonus:
       - COBBLESTONE:16

@@ -2,16 +2,12 @@ package us.talabrek.ultimateskyblock.island;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import us.talabrek.ultimateskyblock.api.model.BlockScore;
 import us.talabrek.ultimateskyblock.island.level.IslandScore;
 import us.talabrek.ultimateskyblock.uSkyBlock;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -19,8 +15,11 @@ public class BlockLimitLogic {
     public enum CanPlace { YES, UNCERTAIN, NO};
 
     private static final Logger log = Logger.getLogger(BlockLimitLogic.class.getName());
-    private uSkyBlock plugin;
-    private Map<Material, Integer> blockLimits = new HashMap<>();
+    private final uSkyBlock plugin;
+
+    private final NavigableMap<Double, Map<Material, Integer>> blockLimits = new TreeMap<>();
+    private final Set<Material> scope = new HashSet<>();
+
     // TODO: R4zorax - 13-07-2018: Persist this somehow - and use a guavacache
     private Map<Location, Map<Material,Integer>> blockCounts = new HashMap<>();
 
@@ -31,27 +30,39 @@ public class BlockLimitLogic {
         FileConfiguration config = plugin.getConfig();
         limitsEnabled = config.getBoolean("options.island.block-limits.enabled", false);
         if (limitsEnabled) {
-            ConfigurationSection section = config.getConfigurationSection("options.island.block-limits");
-            Set<String> keys = section.getKeys(false);
-            keys.remove("enabled");
-            for (String key : keys) {
-                Material material = Material.getMaterial(key.toUpperCase());
-                int limit = section.getInt(key, -1);
-                if (material != null && limit >= 0) {
-                    blockLimits.put(material, limit);
-                } else {
-                    log.warning("Unknown material " + key + " supplied for block-limit, or value not an integer");
+            List<HashMap<String, ?>> section = (List<HashMap<String, ?>>) config.getList("options.island.block-limits.entries");
+            for (HashMap<String, ?> entry : section) {
+                Map<Material, Integer> limits = new HashMap<>();
+                Integer level = (Integer) entry.get("level");
+                Set<String> keys = entry.keySet();
+                keys.remove("level");
+                for (String key : keys) {
+                    Material material = Material.getMaterial(key.toUpperCase());
+                    int limit = (Integer) entry.get(key);
+                    if (material != null && limit >= 0) {
+                        limits.put(material, limit);
+                        scope.add(material);
+                    } else {
+                        log.warning("Unknown material " + key + " supplied for block-limit, or value not an integer");
+                    }
                 }
+                blockLimits.put(level.doubleValue(), limits);
+                plugin.getLogger().info("uSkyBlock loaded limits for ["+level+"]: "+limits);
             }
         }
     }
 
-    public int getLimit(Material type) {
-        return blockLimits.getOrDefault(type, Integer.MAX_VALUE);
+    public int getLimit(double islandLevel, Material type) {
+        return blockLimits.getOrDefault(
+                blockLimits.floorKey(islandLevel),
+                Collections.emptyMap()
+        ).getOrDefault(type, Integer.MAX_VALUE);
     }
 
-    public Map<Material,Integer> getLimits() {
-        return Collections.unmodifiableMap(blockLimits);
+    public Map<Material,Integer> getLimits(double islandLevel) {
+        return Collections.unmodifiableMap(
+                blockLimits.getOrDefault(blockLimits.floorKey(islandLevel), Collections.emptyMap())
+        );
     }
 
     public void updateBlockCount(Location islandLocation, IslandScore score) {
@@ -66,7 +77,7 @@ public class BlockLimitLogic {
         Map<Material, Integer> countMap = new ConcurrentHashMap<>();
         for (BlockScore blockScore : score.getTop()) {
             Material type = blockScore.getBlock().getType();
-            if (blockLimits.containsKey(type)) {
+            if (scope.contains(type)) {
                 countMap.put(type, (countMap.containsKey(type) ? countMap.get(type) + blockScore.getCount() : blockScore.getCount()));
             }
         }
@@ -74,7 +85,7 @@ public class BlockLimitLogic {
     }
 
     public int getCount(Material type, Location islandLocation) {
-        if (!limitsEnabled || !blockLimits.containsKey(type)) {
+        if (!limitsEnabled || !scope.contains(type)) {
             return -1;
         }
         Map<Material, Integer> islandCount = blockCounts.getOrDefault(islandLocation, null);
@@ -91,26 +102,26 @@ public class BlockLimitLogic {
         } else if (count == -2) {
             return CanPlace.UNCERTAIN;
         }
-        return count < blockLimits.getOrDefault(type, Integer.MAX_VALUE) ? CanPlace.YES : CanPlace.NO;
+        return count < getLimit(islandInfo.getLevel(), type) ? CanPlace.YES : CanPlace.NO;
     }
 
     public void incBlockCount(Location islandLocation, Material type) {
-        if (!limitsEnabled || !blockLimits.containsKey(type)) {
+        if (!limitsEnabled || !scope.contains(type)) {
             return;
         }
         Map<Material, Integer> islandCount = blockCounts.getOrDefault(islandLocation, new ConcurrentHashMap<>());
         int blockCount = islandCount.getOrDefault(type, 0);
-        islandCount.put(type, blockCount+1);
+        islandCount.put(type, blockCount + 1);
         blockCounts.put(islandLocation, islandCount);
     }
 
     public void decBlockCount(Location islandLocation, Material type) {
-        if (!limitsEnabled || !blockLimits.containsKey(type)) {
+        if (!limitsEnabled || !scope.contains(type)) {
             return;
         }
         Map<Material, Integer> islandCount = blockCounts.getOrDefault(islandLocation, new ConcurrentHashMap<>());
         int blockCount = islandCount.getOrDefault(type, 0);
-        islandCount.put(type, blockCount-1);
+        islandCount.put(type, blockCount - 1);
         blockCounts.put(islandLocation, islandCount);
     }
 }

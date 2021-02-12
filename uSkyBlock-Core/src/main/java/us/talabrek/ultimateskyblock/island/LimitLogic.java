@@ -141,7 +141,7 @@ public class LimitLogic {
             int max = creatureMax.get(key);
             sb.append(tr("\u00a77{0}: \u00a7a{1}\u00a77 (max. {2})", tr(key.name()), cnt >= max ? tr("\u00a7c{0}",cnt) : cnt, max) + "\n");
         }
-        Map<Material, Integer> blockLimits = plugin.getBlockLimitLogic().getLimits();
+        Map<Material, Integer> blockLimits = plugin.getBlockLimitLogic().getLimits(islandInfo.getLevel());
         for (Map.Entry<Material,Integer> entry : blockLimits.entrySet()) {
             int blockCount = plugin.getBlockLimitLogic().getCount(entry.getKey(), islandInfo.getIslandLocation());
             if (blockCount >= 0) {

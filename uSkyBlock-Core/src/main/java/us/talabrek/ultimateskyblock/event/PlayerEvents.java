@@ -340,7 +340,11 @@ public class PlayerEvents implements Listener {
         }
         if (canPlace == BlockLimitLogic.CanPlace.NO) {
             event.setCancelled(true);
-            player.sendMessage(tr("\u00a74You''ve hit the {0} limit!\u00a7e You can''t have more of that type on your island!\u00a79 Max: {1,number}", VaultHandler.getItemName(new ItemStack(type)), plugin.getBlockLimitLogic().getLimit(type)));
+            player.sendMessage(
+                    tr("\u00a74You''ve hit the {0} limit!\u00a7e You can''t have more of that type on your island!\u00a79 Max: {1,number}",
+                            VaultHandler.getItemName(new ItemStack(type)),
+                            plugin.getBlockLimitLogic().getLimit(islandInfo.getLevel(), type))
+            );
             return;
         }
         plugin.getBlockLimitLogic().incBlockCount(islandInfo.getIslandLocation(), type);
@@ -385,7 +389,11 @@ public class PlayerEvents implements Listener {
         }
         if (canPlace == BlockLimitLogic.CanPlace.NO) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(tr("\u00a74You''ve hit the {0} limit!\u00a7e You can''t have more of that type on your island!\u00a79 Max: {1,number}", VaultHandler.getItemName(new ItemStack(Material.HOPPER_MINECART)), plugin.getBlockLimitLogic().getLimit(Material.HOPPER)));
+            event.getPlayer().sendMessage(
+                    tr("\u00a74You''ve hit the {0} limit!\u00a7e You can''t have more of that type on your island!\u00a79 Max: {1,number}",
+                    VaultHandler.getItemName(new ItemStack(Material.HOPPER_MINECART)),
+                            plugin.getBlockLimitLogic().getLimit(info.getLevel(), Material.HOPPER))
+            );
             return;
         }
 
