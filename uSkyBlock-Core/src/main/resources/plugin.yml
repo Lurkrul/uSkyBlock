@@ -12,6 +12,7 @@ softdepend:
  - Multiverse-Core
  # optional dependencies
  - ActionBarAPI
+ - MiniaturePets
  # WE/AWE
  - FastAsyncWorldEdit
  - AsyncWorldEdit

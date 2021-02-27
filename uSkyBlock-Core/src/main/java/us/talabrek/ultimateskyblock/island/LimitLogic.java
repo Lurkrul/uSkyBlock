@@ -15,6 +15,8 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.WaterMob;
 import org.bukkit.inventory.ItemStack;
+import us.talabrek.ultimateskyblock.compat.CompatHandler;
+import us.talabrek.ultimateskyblock.compat.miniaturepets.MiniaturePetsCompat;
 import us.talabrek.ultimateskyblock.handler.WorldGuardHandler;
 import us.talabrek.ultimateskyblock.uSkyBlock;
 
@@ -109,7 +111,10 @@ public class LimitLogic {
         return CreatureType.UNKNOWN;
     }
 
-    public boolean canSpawn(EntityType entityType, us.talabrek.ultimateskyblock.api.IslandInfo islandInfo) {
+    public boolean canSpawn(Location location, EntityType entityType, us.talabrek.ultimateskyblock.api.IslandInfo islandInfo) {
+        MiniaturePetsCompat compat = plugin.getCompatHandler().getCompat(CompatHandler.Key.MiniaturePets);
+        if (compat.isPetSpawningFor(location, entityType)) return true;
+
         Map<CreatureType, Integer> creatureCount = getCreatureCount(islandInfo);
         CreatureType creatureType = getCreatureType(entityType);
         int max = getMax(islandInfo, creatureType);

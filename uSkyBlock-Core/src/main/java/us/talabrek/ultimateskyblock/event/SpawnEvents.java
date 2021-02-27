@@ -5,11 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.WaterMob;
-import org.bukkit.entity.Wither;
+import org.bukkit.entity.*;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -18,8 +14,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MonsterEggs;
-import org.bukkit.material.SpawnEgg;
+import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import us.talabrek.ultimateskyblock.api.IslandInfo;
 import us.talabrek.ultimateskyblock.handler.WorldGuardHandler;
@@ -69,8 +64,17 @@ public class SpawnEvents implements Listener {
                 plugin.notifyPlayer(player, tr("\u00a7eYou can only use spawn-eggs on your own island."));
                 return;
             }
-            SpawnEgg spawnEgg = (SpawnEgg) item.getData();
-            checkLimits(event, spawnEgg.getSpawnedType(), player.getLocation());
+            String name = item.getType().name();
+
+            EntityType entityType = null;
+            try{
+                entityType = EntityType.valueOf(name.substring(0, name.indexOf("_SPAWN_EGG")));
+            } catch (IllegalArgumentException | NullPointerException e){
+                // no entity for this egg exists
+                return;
+            }
+
+            checkLimits(event, entityType, player.getLocation());
             if (event.isCancelled()) {
                 plugin.notifyPlayer(player, tr("\u00a7cYou have reached your spawn-limit for your island."));
                 event.setUseItemInHand(Event.Result.DENY);
@@ -80,7 +84,7 @@ public class SpawnEvents implements Listener {
     }
 
     private boolean isSpawnEgg(ItemStack item) {
-        return item.getType().name().endsWith("_SPAWN_EGG") && item.getData() instanceof MonsterEggs;
+        return item.getType().name().endsWith("_SPAWN_EGG") && item.getItemMeta() != null && item.getItemMeta() instanceof SpawnEggMeta;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -138,7 +142,7 @@ public class SpawnEvents implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (!plugin.getLimitLogic().canSpawn(entityType, islandInfo)) {
+        if (!plugin.getLimitLogic().canSpawn(location, entityType, islandInfo)) {
             event.setCancelled(true);
         }
     }

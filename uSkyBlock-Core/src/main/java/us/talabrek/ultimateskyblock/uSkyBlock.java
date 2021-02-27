@@ -48,6 +48,7 @@ import us.talabrek.ultimateskyblock.command.IslandCommand;
 import us.talabrek.ultimateskyblock.command.admin.DebugCommand;
 import us.talabrek.ultimateskyblock.command.admin.SetMaintenanceCommand;
 import us.talabrek.ultimateskyblock.command.island.BiomeCommand;
+import us.talabrek.ultimateskyblock.compat.CompatHandler;
 import us.talabrek.ultimateskyblock.event.ExploitEvents;
 import us.talabrek.ultimateskyblock.event.GriefEvents;
 import us.talabrek.ultimateskyblock.event.InternalEvents;
@@ -137,6 +138,7 @@ public class uSkyBlock extends JavaPlugin implements uSkyBlockAPI, CommandManage
     private PerkLogic perkLogic;
     private TeleportLogic teleportLogic;
     private LimitLogic limitLogic;
+    private CompatHandler compatHandler;
 
     /* MANAGERS */
     private WorldManager worldManager;
@@ -187,6 +189,7 @@ public class uSkyBlock extends JavaPlugin implements uSkyBlockAPI, CommandManage
         playerLogic.shutdown();
         islandLogic.shutdown();
         playerDB.shutdown(); // Must be before playerNameChangeManager!!
+        compatHandler.disableAll();
         AsyncWorldEditHandler.onDisable(this);
         DebugCommand.disableLogging(null);
     }
@@ -206,8 +209,10 @@ public class uSkyBlock extends JavaPlugin implements uSkyBlockAPI, CommandManage
         FileUtil.setDataFolder(getDataFolder());
         FileUtil.setAllwaysOverwrite("levelConfig.yml");
         I18nUtil.setDataFolder(getDataFolder());
+        compatHandler = new CompatHandler(this);
 
         reloadConfigs();
+        compatHandler.load();
 
         getServer().getScheduler().runTaskLater(getInstance(), new Runnable() {
             @Override
@@ -765,6 +770,10 @@ public class uSkyBlock extends JavaPlugin implements uSkyBlockAPI, CommandManage
 
     public IslandLocatorLogic getIslandLocatorLogic() {
         return islandLocatorLogic;
+    }
+
+    public CompatHandler getCompatHandler(){
+        return compatHandler;
     }
 
     @Override
