@@ -28,6 +28,7 @@ public class PlaceholderReplacerImpl implements PlaceholderAPI.PlaceholderReplac
     private static final Set<String> PLACEHOLDERS = new HashSet<>(Arrays.asList(
             "usb_version",
             "usb_island_level",
+            "usb_island_leader_level",
             "usb_island_level_int",
             "usb_island_rank",
             "usb_island_leader",
@@ -79,7 +80,7 @@ public class PlaceholderReplacerImpl implements PlaceholderAPI.PlaceholderReplac
             if (playerInfo == null || islandInfo == null) {
                 return tr("N/A");
             }
-            return lookup(islandInfo, placeholder);
+            return lookup(entry, islandInfo, placeholder);
         } else if (placeholder.startsWith("usb_")) {
             return lookup(placeholder);
         }
@@ -93,10 +94,11 @@ public class PlaceholderReplacerImpl implements PlaceholderAPI.PlaceholderReplac
         throw new IllegalArgumentException("Unsupported placeholder " + placeholder);
     }
 
-    private String lookup(IslandInfo islandInfo, String placeholder) {
+    private String lookup(CacheEntry entry, IslandInfo islandInfo, String placeholder) {
         switch (placeholder) {
             case "usb_island_level": return pre("{0,number,##.#}", islandInfo.getLevel());
             case "usb_island_level_int": return pre("{0,number,#}", islandInfo.getLevel());
+            case "usb_island_leader_level": return pre("{0,number,#}", entry.uuid.equals(islandInfo.getLeaderUniqueId()) ? islandInfo.getLevel() : 0);
             case "usb_island_rank": return getRank(islandInfo);
             case "usb_island_leader": return islandInfo.getLeader();
             case "usb_island_golems_max": return "" + islandInfo.getMaxGolems();
