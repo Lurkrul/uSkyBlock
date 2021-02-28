@@ -17,10 +17,10 @@ public class Reward {
     private final String permissionReward;
     private final int currencyReward;
     private final int xpReward;
-    private final String rewardText;
+    private final List<String> rewardText;
     private final List<String> commands;
 
-    public Reward(String rewardText, List<ItemStackUtil.ItemProbability> itemReward, String permissionReward, int currencyReward, int xpReward, List<String> commands) {
+    public Reward(List<String> rewardText, List<ItemStackUtil.ItemProbability> itemReward, String permissionReward, int currencyReward, int xpReward, List<String> commands) {
         this.itemReward = itemReward;
         this.permissionReward = permissionReward;
         this.currencyReward = currencyReward;
@@ -51,7 +51,7 @@ public class Reward {
         return xpReward;
     }
 
-    public String getRewardText() {
+    public List<String> getRewardText() {
         return rewardText;
     }
 

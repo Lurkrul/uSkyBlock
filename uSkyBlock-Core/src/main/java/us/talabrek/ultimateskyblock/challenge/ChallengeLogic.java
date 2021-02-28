@@ -413,7 +413,7 @@ public class ChallengeLogic implements Listener {
         ItemMeta meta = currentChallengeItem.getItemMeta();
         List<String> lores = meta.getLore();
         if (challenge.isRepeatable() || completion.getTimesCompleted() == 0) {
-            lores.add(tr("\u00a7e\u00a7lClick to complete this challenge."));
+            lores.add(tr("\u00a7e\u00a7l\u00bb\u00a7a\u00a7l Click to complete this challenge. \u00a7e\u00a7l\u00ab"));
         } else {
             lores.add(tr("\u00a74\u00a7lYou can't repeat this challenge."));
         }

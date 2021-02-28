@@ -108,8 +108,10 @@ public class ChallengeFactory {
         } else if (section.getString("items", null) != null) {
             items.addAll(Arrays.asList(section.getString("items").split(" ")));
         }
+        List<String> rewards = section.getStringList("text");
+        if (rewards.isEmpty()) rewards = Arrays.asList(section.getString("text", "Unknown"));
         return new Reward(
-                section.getString("text", "\u00a74Unknown"),
+                rewards,
                 ItemStackUtil.createItemsWithProbabilty(items),
                 section.getString("permission"),
                 section.getInt("currency", 0),

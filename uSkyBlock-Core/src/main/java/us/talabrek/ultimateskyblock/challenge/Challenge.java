@@ -1,6 +1,7 @@
 package us.talabrek.ultimateskyblock.challenge;
 
 import dk.lockfuglsang.minecraft.nbt.NBTUtil;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import us.talabrek.ultimateskyblock.handler.VaultHandler;
@@ -195,6 +196,7 @@ public class Challenge {
             }
             reward = getRepeatReward();
         }
+        lores.add("");
         List<ItemStack> reqItems = getRequiredItems(timesCompleted);
         if ((reqItems != null && !reqItems.isEmpty()) || (requiredEntities != null && !requiredEntities.isEmpty())) {
             lores.add(tr("\u00a7eThis challenge requires:"));
@@ -222,23 +224,24 @@ public class Challenge {
                         : tr("\u00a77{0}", entityMatch.getDisplayName()));
             }
         }
-        lores.addAll(wrappedDetails(details));
+        if (!details.isEmpty()){
+            lores.addAll(wrappedDetails(details));
+            lores.add("");
+        }
         if (type == Challenge.Type.PLAYER) {
             if (takeItems) {
-                lores.add(tr("\u00a7eItems will be traded for reward."));
+                lores.add(tr("\u00a7eItems will be \u00a73traded\u00a7e for reward."));
+                lores.add("");
             }
         } else if (type == Challenge.Type.ISLAND) {
-            lores.add(tr("\u00a7eMust be within {0} meters.", getRadius()));
+            lores.add(tr("\u00a7eMust be \u00a73within {0}\u00a7e blocks.", getRadius()));
+            lores.add("");
         }
-        List<String> lines = wordWrap("\u00a7a" + reward.getRewardText(), 20, MAX_LINE);
-        lores.add(tr("\u00a76Item Reward: \u00a7a") + lines.get(0));
-        for (String line : lines.subList(1, lines.size())) {
-            lores.add(line);
-        }
-        if (withCurrency) {
-            lores.add(tr("\u00a76Currency Reward: \u00a7a{0}", reward.getCurrencyReward()));
-        }
-        lores.add(tr("\u00a76Exp Reward: \u00a7a{0}", reward.getXpReward()));
+        lores.add(tr("\u00a76Rewards:"));
+        List<String> rewardLines = reward.getRewardText();
+        for(String s : rewardLines)
+            lores.addAll(wordWrap("\u00a7a" + s, MAX_LINE));
+        lores.add("");
         lores.add(tr("\u00a7dTotal times completed: \u00a7f{0}", completion.getTimesCompleted()));
 
         meta.setLore(lores);
