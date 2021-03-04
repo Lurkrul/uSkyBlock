@@ -1116,7 +1116,7 @@ public class SkyBlockMenu {
             p.performCommand("island");
             return;
         }
-        if (slotIndex >= 21 && slotIndex <= 23) {
+        if (slotIndex >= 30 && slotIndex <= 32) {
             List<String> radii = Arrays.asList("10", "chunk", "20", "30", "40", "50", "60", "70", "80", "90", "100", "all");
             String radius = PlayerUtil.getMetadata(p, "biome.radius", "all");
             int ix = radii.indexOf(radius);
