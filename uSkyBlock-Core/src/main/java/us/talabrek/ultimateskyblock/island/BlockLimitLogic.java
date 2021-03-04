@@ -70,6 +70,7 @@ public class BlockLimitLogic {
             return;
         }
         Map<Material, Integer> countMap = asBlockCount(score);
+        plugin.getLogger().info("Update Block Count for "+islandLocation+": "+countMap);
         blockCounts.put(islandLocation, countMap);
     }
 
@@ -85,6 +86,8 @@ public class BlockLimitLogic {
     }
 
     public int getCount(Material type, Location islandLocation) {
+        if (type == Material.HOPPER)
+            plugin.getLogger().info("Get hoppercount for "+islandLocation);
         if (!limitsEnabled || !scope.contains(type)) {
             return -1;
         }
@@ -92,15 +95,24 @@ public class BlockLimitLogic {
         if (islandCount == null) {
             return -2;
         }
+        if (type == Material.HOPPER)
+            plugin.getLogger().info("Result: "+islandCount.getOrDefault(type, 0));
         return islandCount.getOrDefault(type, 0);
     }
 
     public CanPlace canPlace(Material type, IslandInfo islandInfo) {
         int count = getCount(type, islandInfo.getIslandLocation());
         if (count == -1) {
+            if (type == Material.HOPPER)
+                plugin.getLogger().info("Check if hopper can place on "+islandInfo+": YES");
             return CanPlace.YES;
         } else if (count == -2) {
+            if (type == Material.HOPPER)
+                plugin.getLogger().info("Check if hopper can place on "+islandInfo+": UNCERTAIN");
             return CanPlace.UNCERTAIN;
+        }
+        if (type == Material.HOPPER){
+            plugin.getLogger().info("Check if hopper can place on "+islandInfo+"? Count: "+count+", Limit: "+ getLimit(islandInfo.getLevel(), type));
         }
         return count < getLimit(islandInfo.getLevel(), type) ? CanPlace.YES : CanPlace.NO;
     }
