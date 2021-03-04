@@ -28,6 +28,7 @@ public class GotoIslandCommand extends AbstractPlayerInfoCommand {
         final Player player = (Player) sender;
         if (!playerInfo.getHasIsland()) {
             sender.sendMessage(I18nUtil.tr("\u00a74That player does not have an island!"));
+            plugin.getLogger().info("Island location for Playerinfo is null. PI: "+playerInfo);
         } else if (playerInfo.getHomeLocation() != null) {
             sender.sendMessage(tr("\u00a7aTeleporting to {0}''s island.", playerInfo.getPlayerName()));
             plugin.getTeleportLogic().safeTeleport(player, playerInfo.getHomeLocation(), true);
